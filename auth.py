@@ -1,131 +1,84 @@
-import sqlite3
-from datetime import datetime
-from passlib.hash import pbkdf2_sha256  # <-- вместо bcrypt
+import psycopg
+import os
+from passlib.hash import bcrypt
 
-DB_PATH = "db.sqlite3"
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 
 def get_conn():
-    return sqlite3.connect(DB_PATH)
+    return psycopg.connect(DATABASE_URL, autocommit=True)
 
 
 def init_db():
-    conn = get_conn()
-    cur = conn.cursor()
-
-    # Таблица пользователей
-    cur.execute("""
+    with get_conn() as conn:
+        conn.execute("""
         CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             username TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL,
-            role TEXT NOT NULL DEFAULT 'student'
-        )
-    """)
+            password TEXT NOT NULL
+        );
+        """)
 
-    # Таблица отправок решений
-    cur.execute("""
+        conn.execute("""
         CREATE TABLE IF NOT EXISTS submissions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER REFERENCES users(id),
             task_id INTEGER NOT NULL,
-            is_correct INTEGER NOT NULL,
-            answer TEXT NOT NULL,
-            created_at TEXT NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users(id)
-        )
-    """)
-
-    conn.commit()
-    conn.close()
+            is_correct BOOLEAN NOT NULL,
+            answer TEXT,
+            created_at TIMESTAMPTZ DEFAULT NOW()
+        );
+        """)
 
 
-# --- Пользователи ---
+def create_user(username: str, password: str):
+    password_hash = bcrypt.hash(password)
 
-
-def create_user(username: str, password: str, role: str = "student") -> bool:
-    """Создаёт пользователя, возвращает True/False (успех/уже занят)."""
-    conn = get_conn()
-    cur = conn.cursor()
-    # используем pbkdf2_sha256 вместо bcrypt
-    password_hash = pbkdf2_sha256.hash(password)
     try:
-        cur.execute(
-            "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)",
-            (username, password_hash, role),
-        )
-        conn.commit()
+        with get_conn() as conn:
+            conn.execute(
+                "INSERT INTO users (username, password) VALUES (%s, %s)",
+                (username, password_hash)
+            )
         return True
-    except sqlite3.IntegrityError:
-        # username уже занят
+    except psycopg.errors.UniqueViolation:
         return False
-    finally:
-        conn.close()
 
 
 def verify_user(username: str, password: str):
-    """Возвращает dict с данными пользователя или None."""
-    conn = get_conn()
-    cur = conn.cursor()
-    cur.execute(
-        "SELECT id, password_hash, role FROM users WHERE username = ?",
-        (username,),
-    )
-    row = cur.fetchone()
-    conn.close()
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT id, username, password FROM users WHERE username = %s",
+            (username,)
+        ).fetchone()
 
     if not row:
         return None
 
-    user_id, password_hash, role = row
-    if pbkdf2_sha256.verify(password, password_hash):
-        return {"id": user_id, "username": username, "role": role}
+    user_id, username, password_hash = row
+    if bcrypt.verify(password, password_hash):
+        return {"id": user_id, "username": username}
     return None
 
 
-# --- Отправки и рейтинг ---
-
-
 def add_submission(user_id: int, task_id: int, is_correct: bool, answer: str):
-    conn = get_conn()
-    cur = conn.cursor()
-    cur.execute(
-        """
-        INSERT INTO submissions (user_id, task_id, is_correct, answer, created_at)
-        VALUES (?, ?, ?, ?, ?)
-        """,
-        (user_id, task_id, 1 if is_correct else 0, answer, datetime.utcnow().isoformat()),
-    )
-    conn.commit()
-    conn.close()
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO submissions (user_id, task_id, is_correct, answer) VALUES (%s, %s, %s, %s)",
+            (user_id, task_id, is_correct, answer)
+        )
 
 
 def get_rating():
-    """
-    Возвращает список:
-    [
-      {"username": "Иван", "solved": 3},
-      ...
-    ]
-    Считаем количество уникальных задач, решённых правильно.
-    """
-    conn = get_conn()
-    cur = conn.cursor()
-    cur.execute(
-        """
-        SELECT u.username,
-               COUNT(DISTINCT s.task_id) AS solved
+    with get_conn() as conn:
+        rows = conn.execute("""
+        SELECT 
+            u.username,
+            COUNT(s.*) FILTER (WHERE s.is_correct = true) AS solved
         FROM users u
-        LEFT JOIN submissions s
-          ON u.id = s.user_id AND s.is_correct = 1
+        LEFT JOIN submissions s ON u.id = s.user_id
         GROUP BY u.id
-        ORDER BY solved DESC, u.username ASC
-        """
-    )
-    rows = cur.fetchall()
-    conn.close()
+        ORDER BY solved DESC, username ASC;
+        """).fetchall()
 
-    return [
-        {"username": r[0], "solved": r[1]}
-        for r in rows
-    ]
+    return [{"username": r[0], "solved": r[1]} for r in rows]
