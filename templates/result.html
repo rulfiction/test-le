@@ -1,23 +1,33 @@
 {% extends "base.html" %}
 {% block title %}Результат{% endblock %}
+
 {% block content %}
-<h1>Результат проверки: {{ task.title }}</h1>
+<h3>Результат: {{ task.title }}</h3>
 
 {% if result.error %}
-<p style="color:red;">Ошибка: {{ result.error }}</p>
+<div class="alert alert-danger">{{ result.error }}</div>
 {% endif %}
 
-<ul>
+<ul class="list-group mb-4">
     {% for d in result.details %}
-        <li>
-            Тест {{ d.test }} (args={{ d.args }}): {{ d.status }}.
-            Ожидали: {{ d.expected }}, получили: {{ d.result }}
+        <li class="list-group-item">
+            <b>Тест {{ d.test }}:</b>
+            <br> Аргументы: {{ d.args }}
+            <br> Ожидали: <code>{{ d.expected }}</code>
+            <br> Получили: <code>{{ d.result }}</code>
+            <br> Статус: 
+            {% if d.status == 'ok' %}
+                <span class="text-success">Верно ✔</span>
+            {% else %}
+                <span class="text-danger">Ошибка ✘</span>
+            {% endif %}
         </li>
     {% endfor %}
 </ul>
 
-<h2>Твой код</h2>
+<h5>Ваш код:</h5>
 <pre>{{ code }}</pre>
 
-<a href="/">← Ко всем задачам</a>
+<a href="/" class="btn btn-link">← К списку задач</a>
+
 {% endblock %}

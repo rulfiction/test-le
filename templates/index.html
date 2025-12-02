@@ -1,12 +1,20 @@
 {% extends "base.html" %}
 {% block title %}Задачи{% endblock %}
+
 {% block content %}
-<h1>Список задач</h1>
-<ul>
+<h3 class="mb-4">Выберите задачу:</h3>
+
+<div class="row g-4">
     {% for id, task in tasks.items() %}
-        <li>
-            <a href="/tasks/{{ id }}">{{ task.title }}</a>
-        </li>
+    <div class="col-md-6">
+        <a href="/tasks/{{ id }}" style="text-decoration:none; color:inherit;">
+            <div class="card task-card p-3">
+                <h5>{{ task.title }}</h5>
+                <p>{{ task.short }}</p>
+            </div>
+        </a>
+    </div>
     {% endfor %}
-</ul>
+</div>
+
 {% endblock %}

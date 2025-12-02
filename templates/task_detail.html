@@ -1,17 +1,23 @@
 {% extends "base.html" %}
 {% block title %}{{ task.title }}{% endblock %}
+
 {% block content %}
-<h1>{{ task.title }}</h1>
+<h3>{{ task.title }}</h3>
+
 <p>{{ task.description }}</p>
-<p>Ожидаемая функция: <code>{{ task.function_name }}</code></p>
+
+<div class="alert alert-info">
+    <b>Задание:</b> Напишите функцию <code>{{ task.function_name }}</code>, которая выполняет описание ниже.
+</div>
 
 <form method="post" action="/tasks/{{ task_id }}/submit">
-    <textarea name="code" rows="15" cols="80">def {{ task.function_name }}(...):
+    <textarea name="code" rows="12" class="form-control mb-3">def {{ task.function_name }}(...):
     # Напишите решение здесь
     pass
-    </textarea><br>
-    <button type="submit">Отправить</button>
+    </textarea>
+    <button class="btn btn-primary">Отправить</button>
 </form>
 
-<a href="/">← Ко всем задачам</a>
+<a href="/" class="btn btn-link mt-3">← Назад</a>
+
 {% endblock %}
