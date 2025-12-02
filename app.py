@@ -1,5 +1,5 @@
 # app.py
-from fastapi import FastAPI, Form, Request
+from fastapi import FastAPI, Form, Request, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -28,7 +28,10 @@ def normalize(s: str) -> str:
 
 
 def run_tests(task_id: int, user_code: str):
-    """Проверка ответа: просто сравниваем строку с ожидаемой."""
+    """
+    Проверка ответа: просто сравниваем строку с ожидаемой.
+    ВАЖНО: при неверном ответе не показываем правильный expected.
+    """
     task = TASKS[task_id]
     tests = task["tests"]
 
@@ -39,6 +42,7 @@ def run_tests(task_id: int, user_code: str):
     for i, test in enumerate(tests, start=1):
         expected = normalize(test["expected"])
         if norm_code == expected:
+            # Для успешных тестов можно показать expected (это уже не спойлер)
             details.append({
                 "test": i,
                 "status": "ok",
@@ -47,10 +51,10 @@ def run_tests(task_id: int, user_code: str):
             })
         else:
             all_passed = False
+            # Для проваленных тестов НЕ передаём expected
             details.append({
                 "test": i,
                 "status": "fail",
-                "expected": test["expected"],
                 "result": user_code,
             })
 
@@ -101,21 +105,35 @@ async def block_detail(request: Request, block_id: str):
     )
 
 
-@app.get("/tasks/{task_id}", response_class=HTMLResponse)
-async def task_detail(request: Request, task_id: int):
-    """Страница конкретной задачи."""
-    user = get_current_user(request)
+@app.post("/tasks/{task_id}")
+async def check_task(
+    task_id: int,
+    request: Request,
+    user=Depends(get_current_user),
+):
+    """
+    Проверка простых задач с полем answer.
+    При неверном ответе правильный не показываем.
+    """
     if not user:
-        # только залогиненные могут решать
         return RedirectResponse("/login", status_code=302)
 
-    task = TASKS.get(task_id)
-    if not task:
-        return HTMLResponse("Задача не найдена", status_code=404)
+    form = await request.form()
+    answer = form.get("answer", "")
+
+    task = TASKS[task_id]
+    is_correct = (answer.strip() == task["answer"])
+
+    add_submission(user["id"], task_id, is_correct, answer)
 
     return templates.TemplateResponse(
-        "task_detail.html",
-        {"request": request, "task_id": task_id, "task": task, "user": user},
+        "task.html",
+        {
+            "request": request,
+            "task": task,
+            "is_correct": is_correct,
+            # НИКАКОГО correct_answer здесь нет
+        },
     )
 
 

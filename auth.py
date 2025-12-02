@@ -124,22 +124,15 @@ def add_submission(user_id: int, task_id: int, is_correct: bool, answer: str):
 
 
 def get_rating():
-    """
-    Возвращает рейтинг пользователей:
-    список словарей {"username": ..., "solved": ...},
-    где solved – количество верно решённых задач.
-    """
     with get_conn() as conn:
-        rows = conn.execute(
-            """
+        rows = conn.execute("""
         SELECT 
             u.username,
-            COUNT(s.*) FILTER (WHERE s.is_correct = true) AS solved
+            COUNT(DISTINCT s.task_id) FILTER (WHERE s.is_correct = true) AS solved
         FROM users u
         LEFT JOIN submissions s ON u.id = s.user_id
         GROUP BY u.id
         ORDER BY solved DESC, username ASC;
-        """
-        ).fetchall()
+        """).fetchall()
 
     return [{"username": r[0], "solved": r[1]} for r in rows]
