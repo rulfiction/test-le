@@ -2,40 +2,140 @@
 {% block title %}Рейтинг{% endblock %}
 
 {% block content %}
-<h3>Рейтинг учеников</h3>
+<div class="container mt-4 rating-wrapper" style="max-width: 900px;">
+    <h2 class="mb-3 text-center">Рейтинг учеников</h2>
 
-{% if rating|length == 0 %}
-    <p>Пока никто ничего не решил 🙂</p>
-{% else %}
+    {% if rating|length == 0 %}
+        <p>Пока никто ничего не решил 🙂</p>
+    {% else %}
 
-    <!-- Табличка рейтинга -->
-    <table class="table table-striped mt-3" style="max-width:600px;">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Имя</th>
-                <th>Решено задач</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in rating %}
-            <tr>
-                <td>{{ loop.index }}</td>
-                <td>{{ row.username }}</td>
-                <td>{{ row.solved }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <!-- Табличка рейтинга -->
+        <table class="table mt-3 rating-table">
+            <thead>
+                <tr>
+                    <th style="width: 70px;">Место</th>
+                    <th>Имя</th>
+                    <th style="width: 160px;">Решено задач</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rating %}
+                    {% set place = loop.index %}
+                    {% if place == 1 %}
+                        {% set row_class = "rating-first" %}
+                    {% elif place == 2 %}
+                        {% set row_class = "rating-second" %}
+                    {% elif place == 3 %}
+                        {% set row_class = "rating-third" %}
+                    {% else %}
+                        {% set row_class = "" %}
+                    {% endif %}
 
-    <!-- Блок с графиком -->
-    <div class="mt-4" style="max-width:800px;">
-        <h5>Инфографика: количество решённых задач</h5>
-        <canvas id="ratingChart" height="120"></canvas>
-    </div>
+                    <tr class="{{ row_class }}">
+                        <td class="align-middle">
+                            <div class="d-flex align-items-center">
+                                {% if place == 1 %}
+                                    <span class="crown" title="1 место">👑</span>
+                                {% endif %}
+                                <span class="place-number">{{ place }}</span>
+                            </div>
+                        </td>
+                        <td class="align-middle">
+                            <strong>{{ row.username }}</strong>
+                        </td>
+                        <td class="align-middle">
+                            <span class="badge solved-badge">
+                                {{ row.solved }}
+                            </span>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-{% endif %}
+        <!-- Блок с графиком -->
+        <div class="mt-4 rating-chart-card">
+            <h5 class="mb-3 text-center">Инфографика: количество решённых задач</h5>
+            <canvas id="ratingChart" height="130"></canvas>
+        </div>
 
+    {% endif %}
+</div>
+
+<style>
+/* Общие стили */
+.rating-wrapper {
+    backdrop-filter: blur(4px);
+}
+
+.rating-table {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.35);
+    background: radial-gradient(circle at top left, rgba(56,189,248,0.12), rgba(15,23,42,1));
+    color: #e5e7eb;
+}
+
+.rating-table thead {
+    background: rgba(15,23,42,0.95);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.rating-table thead th {
+    border: none;
+}
+
+.rating-table tbody tr {
+    border-color: rgba(30, 64, 175, 0.4);
+}
+
+/* Подсветка мест */
+.rating-first {
+    background: linear-gradient(90deg, rgba(250, 204, 21, 0.20), rgba(251, 191, 36, 0.05));
+}
+
+.rating-second {
+    background: linear-gradient(90deg, rgba(148, 163, 184, 0.25), rgba(51, 65, 85, 0.1));
+}
+
+.rating-third {
+    background: linear-gradient(90deg, rgba(248, 113, 113, 0.25), rgba(127, 29, 29, 0.08));
+}
+
+.rating-first td,
+.rating-second td,
+.rating-third td {
+    border-color: transparent;
+}
+
+/* Корона и место */
+.crown {
+    font-size: 1.4rem;
+    margin-right: 6px;
+    filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.9));
+}
+
+.place-number {
+    font-weight: 700;
+}
+
+/* Бейдж количества задач */
+.solved-badge {
+    font-size: 0.95rem;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: radial-gradient(circle at top left, #22c55e, #16a34a);
+    color: #f9fafb;
+}
+
+/* Карточка графика */
+.rating-chart-card {
+    padding: 18px 22px 26px;
+    border-radius: 18px;
+    background: radial-gradient(circle at top right, rgba(59,130,246,0.28), rgba(15,23,42,1));
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.5);
+}
+</style>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -44,38 +144,114 @@
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Данные из Python -> JS
+        // Подписи
         const labels = [
             {% for row in rating %}
                 "{{ row.username }}"{% if not loop.last %}, {% endif %}
             {% endfor %}
         ];
 
+        // Данные
         const solvedData = [
             {% for row in rating %}
                 {{ row.solved }}{% if not loop.last %}, {% endif %}
             {% endfor %}
         ];
 
+        // Цвета для столбиков (топ-3 выделяем)
+        const barColors = [
+            {% for row in rating %}
+                {% if loop.index == 1 %}
+                    'rgba(250, 204, 21, 0.95)'   /* золото */
+                {% elif loop.index == 2 %}
+                    'rgba(148, 163, 184, 0.95)'  /* серебро */
+                {% elif loop.index == 3 %}
+                    'rgba(248, 113, 113, 0.95)'  /* бронза */
+                {% else %}
+                    'rgba(59, 130, 246, 0.85)'   /* обычный синий */
+                {% endif %}
+                {% if not loop.last %}, {% endif %}
+            {% endfor %}
+        ];
+
+        const borderColors = [
+            {% for row in rating %}
+                {% if loop.index == 1 %}
+                    'rgba(161, 98, 7, 1)'
+                {% elif loop.index == 2 %}
+                    'rgba(55, 65, 81, 1)'
+                {% elif loop.index == 3 %}
+                    'rgba(127, 29, 29, 1)'
+                {% else %}
+                    'rgba(30, 64, 175, 1)'
+                {% endif %}
+                {% if not loop.last %}, {% endif %}
+            {% endfor %}
+        ];
+
         const ctx = document.getElementById('ratingChart').getContext('2d');
 
-        const chart = new Chart(ctx, {
+        new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Решено задач',
                     data: solvedData,
-                    borderWidth: 1
+                    backgroundColor: barColors,
+                    borderColor: borderColors,
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    maxBarThickness: 46
                 }]
             },
             options: {
-                animation: false,
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                return ctx.parsed.y + ' задач(и)';
+                            }
+                        }
+                    },
+                    title: {
+                        display: false
+                    }
+                },
+                layout: {
+                    padding: {
+                        top: 10,
+                        right: 10,
+                        left: 10,
+                        bottom: 10
+                    }
+                },
                 scales: {
+                    x: {
+                        ticks: {
+                            color: '#e5e7eb',
+                            maxRotation: 40,
+                            minRotation: 0,
+                            font: {
+                                size: 12
+                            }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            precision: 0
+                            precision: 0,
+                            color: '#9ca3af'
+                        },
+                        grid: {
+                            color: 'rgba(55, 65, 81, 0.5)'
                         }
                     }
                 }
