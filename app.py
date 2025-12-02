@@ -124,7 +124,7 @@ async def task_page(
         return HTMLResponse("Задача не найдена", status_code=404)
 
     return templates.TemplateResponse(
-        "task.html",
+        "task_detail.html",
         {
             "request": request,
             "task": task,
@@ -159,7 +159,7 @@ async def check_task(
     add_submission(user["id"], task_id, is_correct, answer)
 
     return templates.TemplateResponse(
-        "task.html",
+        "task_detail.html",
         {
             "request": request,
             "task": task,
