@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Результат{% endblock %}
+{% block content %}
+<h1>Результат проверки: {{ task.title }}</h1>
+
+{% if result.error %}
+<p style="color:red;">Ошибка: {{ result.error }}</p>
+{% endif %}
+
+<ul>
+    {% for d in result.details %}
+        <li>
+            Тест {{ d.test }} (args={{ d.args }}): {{ d.status }}.
+            Ожидали: {{ d.expected }}, получили: {{ d.result }}
+        </li>
+    {% endfor %}
+</ul>
+
+<h2>Твой код</h2>
+<pre>{{ code }}</pre>
+
+<a href="/">← Ко всем задачам</a>
+{% endblock %}

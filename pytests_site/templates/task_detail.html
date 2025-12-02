@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{{ task.title }}{% endblock %}
+{% block content %}
+<h1>{{ task.title }}</h1>
+<p>{{ task.description }}</p>
+<p>Ожидаемая функция: <code>{{ task.function_name }}</code></p>
+
+<form method="post" action="/tasks/{{ task_id }}/submit">
+    <textarea name="code" rows="15" cols="80">def {{ task.function_name }}(...):
+    # Напишите решение здесь
+    pass
+    </textarea><br>
+    <button type="submit">Отправить</button>
+</form>
+
+<a href="/">← Ко всем задачам</a>
+{% endblock %}
