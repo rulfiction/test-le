@@ -1,7 +1,6 @@
-# auth.py
 import sqlite3
 from datetime import datetime
-from passlib.hash import bcrypt
+from passlib.hash import pbkdf2_sha256  # <-- вместо bcrypt
 
 DB_PATH = "db.sqlite3"
 
@@ -48,7 +47,8 @@ def create_user(username: str, password: str, role: str = "student") -> bool:
     """Создаёт пользователя, возвращает True/False (успех/уже занят)."""
     conn = get_conn()
     cur = conn.cursor()
-    password_hash = bcrypt.hash(password)
+    # используем pbkdf2_sha256 вместо bcrypt
+    password_hash = pbkdf2_sha256.hash(password)
     try:
         cur.execute(
             "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)",
@@ -78,7 +78,7 @@ def verify_user(username: str, password: str):
         return None
 
     user_id, password_hash, role = row
-    if bcrypt.verify(password, password_hash):
+    if pbkdf2_sha256.verify(password, password_hash):
         return {"id": user_id, "username": username, "role": role}
     return None
 
