@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
-from tasks_config import TASKS
+from tasks_config import TASKS, BLOCKS
 from auth import init_db, verify_user, create_user, add_submission, get_rating
 
 app = FastAPI()
@@ -61,19 +61,49 @@ def run_tests(task_id: int, user_code: str):
     }
 
 
-# ========= МАРШРУТЫ ЗАДАЧ =========
+# ========= МАРШРУТЫ (ТЕМЫ и ЗАДАЧИ) =========
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
+    """Главная: список блоков (тем)."""
     user = get_current_user(request)
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "tasks": TASKS, "user": user},
+        {"request": request, "blocks": BLOCKS, "user": user},
+    )
+
+
+@app.get("/blocks/{block_id}", response_class=HTMLResponse)
+async def block_detail(request: Request, block_id: str):
+    """Страница блока: список задач внутри темы."""
+    user = get_current_user(request)
+
+    block = BLOCKS.get(block_id)
+    if not block:
+        return HTMLResponse("Блок не найден", status_code=404)
+
+    # отфильтруем задачи этого блока
+    block_tasks = {
+        task_id: task
+        for task_id, task in TASKS.items()
+        if task.get("block_id") == block_id
+    }
+
+    return templates.TemplateResponse(
+        "block_detail.html",
+        {
+            "request": request,
+            "block_id": block_id,
+            "block": block,
+            "tasks": block_tasks,
+            "user": user,
+        },
     )
 
 
 @app.get("/tasks/{task_id}", response_class=HTMLResponse)
 async def task_detail(request: Request, task_id: int):
+    """Страница конкретной задачи."""
     user = get_current_user(request)
     if not user:
         # только залогиненные могут решать
@@ -95,6 +125,7 @@ async def submit_solution(
     task_id: int,
     code: str = Form(...),
 ):
+    """Приём решения, проверка, запись в submissions."""
     user = get_current_user(request)
     if not user:
         return RedirectResponse("/login", status_code=302)

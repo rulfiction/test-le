@@ -1,16 +1,16 @@
 {% extends "base.html" %}
-{% block title %}Задачи{% endblock %}
+{% block title %}Темы{% endblock %}
 
 {% block content %}
-<h3 class="mb-4">Выберите задачу:</h3>
+<h3 class="mb-4">Выберите тему:</h3>
 
 <div class="row g-4">
-    {% for id, task in tasks.items() %}
+    {% for block_id, block in blocks.items() %}
     <div class="col-md-6">
-        <a href="/tasks/{{ id }}" style="text-decoration:none; color:inherit;">
+        <a href="/blocks/{{ block_id }}" style="text-decoration:none; color:inherit;">
             <div class="card task-card p-3">
-                <h5>{{ task.title }}</h5>
-                <p>{{ task.short }}</p>
+                <h5>{{ block.title }}</h5>
+                <p>{{ block.description }}</p>
             </div>
         </a>
     </div>
