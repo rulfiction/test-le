@@ -113,7 +113,6 @@ async def task_page(
 ):
     """
     Страница задачи: показать условие и форму ответа.
-    Никакой проверки, просто initial view.
     """
     user = get_current_user(request)
     if not user:
@@ -128,44 +127,9 @@ async def task_page(
         {
             "request": request,
             "task": task,
+            "task_id": task_id,      # <-- ключевое: передаём task_id
             "user": user,
-            "is_correct": None,  # ещё не проверяли
-        },
-    )
-
-
-@app.post("/tasks/{task_id}")
-async def check_task(
-    task_id: int,
-    request: Request,
-    user=Depends(get_current_user),
-):
-    """
-    Проверка простых задач с полем answer.
-    При неверном ответе правильный не показываем.
-    """
-    if not user:
-        return RedirectResponse("/login", status_code=302)
-
-    form = await request.form()
-    answer = form.get("answer", "")
-
-    task = TASKS.get(task_id)
-    if not task:
-        return HTMLResponse("Задача не найдена", status_code=404)
-
-    is_correct = (answer.strip() == task["answer"])
-
-    add_submission(user["id"], task_id, is_correct, answer)
-
-    return templates.TemplateResponse(
-        "task_detail.html",
-        {
-            "request": request,
-            "task": task,
-            "is_correct": is_correct,
-            "user": user,
-            # НИКАКОГО correct_answer здесь нет
+            "is_correct": None,
         },
     )
 
