@@ -56,7 +56,11 @@
         <!-- Блок с графиком -->
         <div class="mt-4 rating-chart-card">
             <h5 class="mb-3 text-center">Инфографика: количество решённых задач</h5>
-            <canvas id="ratingChart" height="130"></canvas>
+
+            <!-- Контейнер с фиксированной высотой и ограниченной шириной -->
+            <div class="chart-container">
+                <canvas id="ratingChart"></canvas>
+            </div>
         </div>
 
     {% endif %}
@@ -135,6 +139,20 @@
     background: radial-gradient(circle at top right, rgba(59,130,246,0.28), rgba(15,23,42,1));
     box-shadow: 0 10px 25px rgba(15, 23, 42, 0.5);
 }
+
+/* Контейнер графика: фиксированная высота и адекватная ширина */
+.chart-container {
+    position: relative;
+    max-width: 700px;   /* чтобы график не растягивался на всю ширину экрана */
+    height: 260px;      /* фиксированная высота, чтобы "не лез вверх" */
+    margin: 0 auto;
+    overflow-x: auto;   /* если много учеников, появится аккуратный горизонтальный скролл */
+}
+
+.chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
 </style>
 {% endblock %}
 
@@ -201,12 +219,12 @@
                     borderColor: borderColors,
                     borderWidth: 2,
                     borderRadius: 8,
-                    maxBarThickness: 46
+                    maxBarThickness: 26    // было 46, делаем столбики компактнее
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
+                maintainAspectRatio: false,  // подстраиваемся под height контейнера
                 plugins: {
                     legend: {
                         display: false
