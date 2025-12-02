@@ -4,30 +4,27 @@
 {% block content %}
 <h3>Результат: {{ task.title }}</h3>
 
-{% if result.error %}
-<div class="alert alert-danger">{{ result.error }}</div>
-{% endif %}
+<div class="card mb-3">
+    <div class="card-body">
+        <pre><code>{{ task.snippet }}</code></pre>
+    </div>
+</div>
 
 <ul class="list-group mb-4">
     {% for d in result.details %}
         <li class="list-group-item">
-            <b>Тест {{ d.test }}:</b>
-            <br> Аргументы: {{ d.args }}
-            <br> Ожидали: <code>{{ d.expected }}</code>
-            <br> Получили: <code>{{ d.result }}</code>
-            <br> Статус: 
+            <b>Тест {{ d.test }}:</b><br>
+            Ожидали: <code>{{ d.expected }}</code><br>
+            Ваш ответ: <code>{{ d.result }}</code><br>
+            Статус:
             {% if d.status == 'ok' %}
                 <span class="text-success">Верно ✔</span>
             {% else %}
-                <span class="text-danger">Ошибка ✘</span>
+                <span class="text-danger">Неверно ✘</span>
             {% endif %}
         </li>
     {% endfor %}
 </ul>
 
-<h5>Ваш код:</h5>
-<pre>{{ code }}</pre>
-
 <a href="/" class="btn btn-link">← К списку задач</a>
-
 {% endblock %}

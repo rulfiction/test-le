@@ -2,71 +2,42 @@
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from typing import Dict, Any
 
 from tasks_config import TASKS
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
+def normalize(s: str) -> str:
+    # можно усложнить при желании
+    return s.strip()
 
-def run_tests(task_id: int, user_code: str):
+
+def run_tests(task_id: int, user_answer: str) -> Dict[str, Any]:
     task = TASKS[task_id]
-    func_name = task["function_name"]
     tests = task["tests"]
 
-    ns = {}
-    try:
-        exec(user_code, ns)
-    except Exception as e:
-        return {
-            "ok": False,
-            "error": f"Ошибка при выполнении кода: {e}",
-            "details": [],
-        }
-
-    if func_name not in ns or not callable(ns[func_name]):
-        return {
-            "ok": False,
-            "error": f"Не найдена функция {func_name}",
-            "details": [],
-        }
-
-    func = ns[func_name]
+    norm_answer = normalize(user_answer)
     details = []
     all_passed = True
 
     for i, test in enumerate(tests, start=1):
-        args = test["args"]
-        expected = test["expected"]
-        try:
-            result = func(*args)
-        except Exception as e:
-            all_passed = False
-            details.append({
-                "test": i,
-                "status": "error",
-                "args": args,
-                "expected": expected,
-                "result": str(e),
-            })
-            continue
-
-        if result == expected:
+        expected = normalize(test["expected"])
+        if norm_answer == expected:
             details.append({
                 "test": i,
                 "status": "ok",
-                "args": args,
-                "expected": expected,
-                "result": result,
+                "expected": test["expected"],
+                "result": user_answer,
             })
         else:
             all_passed = False
             details.append({
                 "test": i,
                 "status": "fail",
-                "args": args,
-                "expected": expected,
-                "result": result,
+                "expected": test["expected"],
+                "result": user_answer,
             })
 
     return {
@@ -108,6 +79,23 @@ async def submit_solution(request: Request, task_id: int, code: str = Form(...))
             "request": request,
             "task": task,
             "code": code,
+            "result": result,
+        },
+    )
+    
+@app.post("/tasks/{task_id}/submit", response_class=HTMLResponse)
+async def submit_solution(request: Request, task_id: int, answer: str = Form(...)):
+    task = TASKS.get(task_id)
+    if not task:
+        return HTMLResponse("Задача не найдена", status_code=404)
+
+    result = run_tests(task_id, answer)
+    return templates.TemplateResponse(
+        "result.html",
+        {
+            "request": request,
+            "task": task,
+            "answer": answer,
             "result": result,
         },
     )

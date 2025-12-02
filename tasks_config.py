@@ -1,101 +1,97 @@
 TASKS = {
     1: {
-        "title": "Что такое GameObject?",
-        "short": "Основной объект в Unity",
-        "description": "Верните строку: 'GameObject — основной объект в Unity, который может содержать компоненты'.",
-        "function_name": "answer",
+        "title": "Привет, мир",
+        "short": "Напечатать простое сообщение",
+        "description": "Заполни Debug.Log так, чтобы он выводил 'Привет, мир!'.",
+        "snippet": 'Debug.Log("___");',
+        "input_label": "Что вставить вместо ___ ?",
         "tests": [
-            {"args": (), "expected": "GameObject — основной объект в Unity, который может содержать компоненты"},
+            {"expected": 'Привет, мир!'},
         ],
     },
 
     2: {
-        "title": "Что такое Component?",
-        "short": "Компоненты объяснение",
-        "description": "Верните строку: 'Component — функциональная часть объекта, например Transform или Collider'.",
-        "function_name": "answer",
+        "title": "Сложение чисел",
+        "short": "Вывести сумму",
+        "description": "Вставь выражение для вывода суммы a и b.",
+        "snippet": 'int a = 5;\nint b = 3;\nDebug.Log("Результат: " + ___);',
+        "input_label": "Что вставить?",
         "tests": [
-            {"args": (), "expected": "Component — функциональная часть объекта, например Transform или Collider"},
+            {"expected": 'a + b'},
         ],
     },
 
     3: {
-        "title": "Для чего нужен Transform?",
-        "short": "Позиция/вращение/масштаб",
-        "description": "Верните строку: 'Transform хранит позицию, вращение и масштаб объекта'.",
-        "function_name": "answer",
+        "title": "Показать переменную",
+        "short": "Вывести score",
+        "description": "Заполни Debug.Log так, чтобы он выводил значение score.",
+        "snippet": 'int score = 100;\nDebug.Log("Score = " + ___);',
         "tests": [
-            {"args": (), "expected": "Transform хранит позицию, вращение и масштаб объекта"},
+            {"expected": 'score'},
         ],
+        "input_label": "Вставь недостающую часть:"
     },
 
     4: {
-        "title": "Что делает Rigidbody?",
-        "short": "Физика объекта",
-        "description": "Верните строку: 'Rigidbody добавляет объекту физику — массу, силу, гравитацию'.",
-        "function_name": "answer",
-        "tests": [
-            {"args": (), "expected": "Rigidbody добавляет объекту физику — массу, силу, гравитацию"},
-        ],
+        "title": "Приветствие",
+        "short": "Вывести имя",
+        "description": "Вставь переменную name.",
+        "snippet": 'string name = "Alex";\nDebug.Log("Привет, " + ___ + "!");',
+        "tests": [{"expected": 'name'}],
+        "input_label": "Что вставить?"
     },
 
     5: {
-        "title": "Что такое Prefab?",
-        "short": "Шаблон объекта",
-        "description": "Верните строку: 'Prefab — это сохранённый шаблон объекта для многократного использования'.",
-        "function_name": "answer",
-        "tests": [
-            {"args": (), "expected": "Prefab — это сохранённый шаблон объекта для многократного использования"},
-        ],
+        "title": "Скорость",
+        "short": "Вывести speed",
+        "description": "Нужно вывести значение скорости.",
+        "snippet": 'float speed = 4.5f;\nDebug.Log("Speed: " + ___ + " m/s");',
+        "tests": [{"expected": 'speed'}],
+        "input_label": "Что вставить?"
     },
 
     6: {
-        "title": "Что делает Collider?",
-        "short": "Столкновения",
-        "description": "Верните строку: 'Collider определяет форму объекта для столкновений'.",
-        "function_name": "answer",
-        "tests": [
-            {"args": (), "expected": "Collider определяет форму объекта для столкновений"},
-        ],
+        "title": "Сумма трёх чисел",
+        "short": "Вывести сумму",
+        "description": "Вставь выражение для суммы трех чисел.",
+        "snippet": 'int a = 2, b = 4, c = 6;\nDebug.Log("Sum = " + (___));',
+        "tests": [{"expected": 'a + b + c'}],
+        "input_label": "Что вставить?"
     },
 
     7: {
-        "title": "Метод Update",
-        "short": "Вызывается каждый кадр",
-        "description": "Верните строку: 'Update вызывается один раз каждый кадр'.",
-        "function_name": "answer",
-        "tests": [
-            {"args": (), "expected": "Update вызывается один раз каждый кадр"},
-        ],
+        "title": "Победа",
+        "short": "Вывести победителя",
+        "description": "Вставь номер игрока.",
+        "snippet": 'Debug.Log("Player " + ___ + " wins!");',
+        "tests": [{"expected": '1'}],
+        "input_label": "Что вставить?"
     },
 
     8: {
-        "title": "Метод Start",
-        "short": "Вызывается при запуске",
-        "description": "Верните строку: 'Start вызывается один раз при запуске объекта'.",
-        "function_name": "answer",
-        "tests": [
-            {"args": (), "expected": "Start вызывается один раз при запуске объекта"},
-        ],
+        "title": "Координаты позиции",
+        "short": "Вывести pos.x",
+        "description": "Выведи координату X.",
+        "snippet": 'Vector3 pos = new Vector3(1, 2, 3);\nDebug.Log("Position: " + pos.___);',
+        "tests": [{"expected": 'x'}],
+        "input_label": "Что вставить?"
     },
 
     9: {
-        "title": "Как изменить скорость объекта?",
-        "short": "Через Rigidbody",
-        "description": "Верните строку: 'Скорость объекта меняется через Rigidbody.velocity'.",
-        "function_name": "answer",
-        "tests": [
-            {"args": (), "expected": "Скорость объекта меняется через Rigidbody.velocity"},
-        ],
+        "title": "Жизни",
+        "short": "Вывести lives",
+        "description": "Выведи количество жизней.",
+        "snippet": 'int lives = 3;\nDebug.Log("Lives left: " + ___);',
+        "tests": [{"expected": 'lives'}],
+        "input_label": "Что вставить?"
     },
 
     10: {
-        "title": "Что такое Scene?",
-        "short": "Игровая сцена",
-        "description": "Верните строку: 'Scene — это уровень/экран, содержащий объекты игры'.",
-        "function_name": "answer",
-        "tests": [
-            {"args": (), "expected": "Scene — это уровень/экран, содержащий объекты игры"},
-        ],
+        "title": "Game Over",
+        "short": "Простой текст",
+        "description": "Нужно вывести Game Over.",
+        "snippet": 'Debug.Log("___");',
+        "tests": [{"expected": 'Game Over'}],
+        "input_label": "Что вставить?"
     },
 }

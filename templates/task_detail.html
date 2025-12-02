@@ -6,18 +6,19 @@
 
 <p>{{ task.description }}</p>
 
-<div class="alert alert-info">
-    <b>Задание:</b> Напишите функцию <code>{{ task.function_name }}</code>, которая выполняет описание ниже.
+<div class="card mb-3">
+    <div class="card-body">
+        <pre><code>{{ task.snippet }}</code></pre>
+    </div>
 </div>
 
 <form method="post" action="/tasks/{{ task_id }}/submit">
-    <textarea name="code" rows="12" class="form-control mb-3">def {{ task.function_name }}(...):
-    # Напишите решение здесь
-    pass
-    </textarea>
+    <div class="mb-3">
+        <label class="form-label">{{ task.input_label }}</label>
+        <input type="text" name="answer" class="form-control" autocomplete="off">
+    </div>
     <button class="btn btn-primary">Отправить</button>
 </form>
 
-<a href="/" class="btn btn-link mt-3">← Назад</a>
-
+<a href="/" class="btn btn-link mt-3">← Назад к списку задач</a>
 {% endblock %}
