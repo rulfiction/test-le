@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<h3>Регистрация</h3>
+
+<form method="post" action="/register" class="mt-3" style="max-width:400px;">
+    <div class="mb-3">
+        <label class="form-label">Имя пользователя</label>
+        <input type="text" name="username" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Пароль</label>
+        <input type="password" name="password" class="form-control" required>
+    </div>
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <button class="btn btn-success">Зарегистрироваться</button>
+</form>
+{% endblock %}

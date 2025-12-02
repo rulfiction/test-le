@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Рейтинг{% endblock %}
+
+{% block content %}
+<h3>Рейтинг учеников</h3>
+
+<table class="table table-striped mt-3" style="max-width:600px;">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Имя</th>
+            <th>Решено задач</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in rating %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ row.username }}</td>
+            <td>{{ row.solved }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if rating|length == 0 %}
+<p>Пока никто ничего не решил 🙂</p>
+{% endif %}
+
+{% endblock %}
