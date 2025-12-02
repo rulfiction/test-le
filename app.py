@@ -29,8 +29,9 @@ def normalize(s: str) -> str:
 
 def run_tests(task_id: int, user_code: str):
     """
-    Проверка ответа: просто сравниваем строку с ожидаемой.
-    ВАЖНО: при неверном ответе не показываем правильный expected.
+    Проверка ответа для задач с tests:
+    сравниваем строку с ожидаемой.
+    При неверном ответе НЕ показываем правильный expected.
     """
     task = TASKS[task_id]
     tests = task["tests"]
@@ -42,7 +43,7 @@ def run_tests(task_id: int, user_code: str):
     for i, test in enumerate(tests, start=1):
         expected = normalize(test["expected"])
         if norm_code == expected:
-            # Для успешных тестов можно показать expected (это уже не спойлер)
+            # Для успешных тестов можно показать expected
             details.append({
                 "test": i,
                 "status": "ok",
@@ -105,6 +106,34 @@ async def block_detail(request: Request, block_id: str):
     )
 
 
+@app.get("/tasks/{task_id}", response_class=HTMLResponse)
+async def task_page(
+    request: Request,
+    task_id: int,
+):
+    """
+    Страница задачи: показать условие и форму ответа.
+    Никакой проверки, просто initial view.
+    """
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+
+    task = TASKS.get(task_id)
+    if not task:
+        return HTMLResponse("Задача не найдена", status_code=404)
+
+    return templates.TemplateResponse(
+        "task.html",
+        {
+            "request": request,
+            "task": task,
+            "user": user,
+            "is_correct": None,  # ещё не проверяли
+        },
+    )
+
+
 @app.post("/tasks/{task_id}")
 async def check_task(
     task_id: int,
@@ -121,7 +150,10 @@ async def check_task(
     form = await request.form()
     answer = form.get("answer", "")
 
-    task = TASKS[task_id]
+    task = TASKS.get(task_id)
+    if not task:
+        return HTMLResponse("Задача не найдена", status_code=404)
+
     is_correct = (answer.strip() == task["answer"])
 
     add_submission(user["id"], task_id, is_correct, answer)
@@ -132,6 +164,7 @@ async def check_task(
             "request": request,
             "task": task,
             "is_correct": is_correct,
+            "user": user,
             # НИКАКОГО correct_answer здесь нет
         },
     )
@@ -143,7 +176,7 @@ async def submit_solution(
     task_id: int,
     code: str = Form(...),
 ):
-    """Приём решения, проверка, запись в submissions."""
+    """Приём решения, проверка, запись в submissions для задач с tests."""
     user = get_current_user(request)
     if not user:
         return RedirectResponse("/login", status_code=302)
