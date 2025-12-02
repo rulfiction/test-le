@@ -4,27 +4,83 @@
 {% block content %}
 <h3>Рейтинг учеников</h3>
 
-<table class="table table-striped mt-3" style="max-width:600px;">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Имя</th>
-            <th>Решено задач</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for row in rating %}
-        <tr>
-            <td>{{ loop.index }}</td>
-            <td>{{ row.username }}</td>
-            <td>{{ row.solved }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
 {% if rating|length == 0 %}
-<p>Пока никто ничего не решил 🙂</p>
+    <p>Пока никто ничего не решил 🙂</p>
+{% else %}
+
+    <!-- Табличка рейтинга -->
+    <table class="table table-striped mt-3" style="max-width:600px;">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Имя</th>
+                <th>Решено задач</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rating %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ row.username }}</td>
+                <td>{{ row.solved }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Блок с графиком -->
+    <div class="mt-4" style="max-width:800px;">
+        <h5>Инфографика: количество решённых задач</h5>
+        <canvas id="ratingChart" height="120"></canvas>
+    </div>
+
 {% endif %}
 
+{% endblock %}
+
+{% block extra_scripts %}
+    {{ super() }}
+    {% if rating|length > 0 %}
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Данные из Python -> JS
+        const labels = [
+            {% for row in rating %}
+                "{{ row.username }}"{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        ];
+
+        const solvedData = [
+            {% for row in rating %}
+                {{ row.solved }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        ];
+
+        const ctx = document.getElementById('ratingChart').getContext('2d');
+
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Решено задач',
+                    data: solvedData,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                animation: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+    {% endif %}
 {% endblock %}
