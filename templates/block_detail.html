@@ -5,6 +5,15 @@
 <h3 class="mb-2">{{ block.title }}</h3>
 <p class="text-muted mb-4">{{ block.description }}</p>
 
+{# <-- новый блок с теорией #}
+{% if block.theory %}
+<div class="card mb-4">
+    <div class="card-body">
+        {{ block.theory | safe }}
+    </div>
+</div>
+{% endif %}
+
 <div class="row g-4">
     {% for id, task in tasks.items() %}
     <div class="col-md-6">
