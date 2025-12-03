@@ -64,6 +64,81 @@ Debug.Log("Сумма: " + (a + b));
 а активно считает числа и использует их в игровом процессе.</p>
         """,
     },
+     "movement": {
+        "title": "Движение объекта",
+        "description": "Задачи на движение и поворот объекта через transform.",
+        "theory": """
+<h3>Движение объекта в Unity</h3>
+
+<p>У каждого объекта в Unity есть компонент <code>Transform</code>. 
+Он хранит позицию, поворот и масштаб объекта в трёхмерном мире.</p>
+
+<ul>
+  <li><strong>position</strong> — где находится объект;</li>
+  <li><strong>rotation</strong> — как он повёрнут;</li>
+  <li><strong>localScale</strong> — во сколько раз растянут или уменьшен.</li>
+</ul>
+
+<p>Чаще всего движение делают в методе <code>Update()</code>. 
+Этот метод вызывается каждый кадр игры, то есть много раз в секунду.</p>
+
+<h4>Простое движение</h4>
+
+<p>Один из самых простых способов двигать объект — использовать метод 
+<code>transform.Translate(...)</code>. Он сдвигает объект на вектор, который мы передаём.</p>
+
+<pre><code>void Update()
+{
+    // каждую секунду немного двигаем объект вправо
+    transform.Translate(Vector3.right);
+}</code></pre>
+
+<ul>
+  <li><code>Vector3.right</code> — вектор (1, 0, 0), движение по оси X вправо;</li>
+  <li><code>Vector3.left</code> — (−1, 0, 0);</li>
+  <li><code>Vector3.up</code> — (0, 1, 0);</li>
+  <li><code>Vector3.down</code> — (0, −1, 0);</li>
+  <li><code>Vector3.forward</code> — (0, 0, 1);</li>
+  <li><code>Vector3.back</code> — (0, 0, −1).</li>
+</ul>
+
+<h4>Скорость движения</h4>
+
+<p>Чтобы управлять скоростью, обычно заводят переменную <code>speed</code>:</p>
+
+<pre><code>public float speed = 2f;
+
+void Update()
+{
+    transform.Translate(Vector3.right * speed * Time.deltaTime);
+}</code></pre>
+
+<p><code>Time.deltaTime</code> — время (в секундах) между кадрами. 
+Если домножать движение на <code>deltaTime</code>, то объект будет двигаться 
+равномерно на разных компьютерах.</p>
+
+<h4>Поворот объекта</h4>
+
+<p>Повернуть объект можно методом <code>transform.Rotate(...)</code>:</p>
+
+<pre><code>public float rotationSpeed = 90f;
+
+void Update()
+{
+    // поворот вокруг оси Y
+    transform.Rotate(0, rotationSpeed * Time.deltaTime, 0);
+}</code></pre>
+
+<p>Так мы задаём скорость поворота в градусах в секунду.</p>
+
+<p>В задачах этого блока мы потренируемся:</p>
+<ul>
+  <li>двигать объект в разные стороны;</li>
+  <li>использовать <code>Vector3</code> для направления;</li>
+  <li>подставлять переменную скорости в формулу движения или поворота.</li>
+</ul>
+        """,
+    },
 }
 TASKS = {
     1: {
@@ -232,5 +307,127 @@ TASKS.update({
             {"expected": "a % b"},
         ],
         "block_id": "math",
+    },
+})
+
+TASKS.update({
+    16: {
+        "title": "Движение вправо",
+        "short": "Translate вправо",
+        "description": "Сделай так, чтобы объект каждый кадр немного двигался вправо по оси X.",
+        "snippet": "void Update()\n{\n    transform.Translate(___);\n}",
+        "input_label": "Что вставить вместо ___ ?",
+        "tests": [
+            {"expected": "Vector3.right"},
+        ],
+        "block_id": "movement",
+    },
+
+    17: {
+        "title": "Движение вперёд",
+        "short": "Translate вперёд",
+        "description": "Сделай так, чтобы объект двигался вперёд по оси Z.",
+        "snippet": "void Update()\n{\n    transform.Translate(___);\n}",
+        "input_label": "Что вставить вместо ___ ?",
+        "tests": [
+            {"expected": "Vector3.forward"},
+        ],
+        "block_id": "movement",
+    },
+
+    18: {
+        "title": "Скорость движения",
+        "short": "speed по Z",
+        "description": "Используй переменную speed, чтобы задать скорость движения вперёд.",
+        "snippet": "public float speed = 2f;\n\nvoid Update()\n{\n    transform.Translate(Vector3.forward * ___);\n}",
+        "input_label": "Что вставить вместо ___ ?",
+        "tests": [
+            {"expected": "speed"},
+        ],
+        "block_id": "movement",
+    },
+
+    19: {
+        "title": "Скорость + deltaTime",
+        "short": "равномерное движение",
+        "description": "Сделай так, чтобы движение вправо не зависело от FPS (используй Time.deltaTime).",
+        "snippet": "public float speed = 3f;\n\nvoid Update()\n{\n    transform.Translate(Vector3.right * ___);\n}",
+        "input_label": "Что вставить вместо ___ ?",
+        "tests": [
+            {"expected": "speed * Time.deltaTime"},
+        ],
+        "block_id": "movement",
+    },
+
+    20: {
+        "title": "Диагональное движение",
+        "short": "вперёд и вправо",
+        "description": "Сделай так, чтобы объект двигался одновременно вперёд и вправо.",
+        "snippet": "void Update()\n{\n    transform.Translate(___);\n}",
+        "input_label": "Что вставить вместо ___ ?",
+        "tests": [
+            {"expected": "Vector3.right + Vector3.forward"},
+        ],
+        "block_id": "movement",
+    },
+
+    21: {
+        "title": "Изменение позиции через position",
+        "short": "position + вектор",
+        "description": "Сделай шаг вверх, напрямую изменяя transform.position.",
+        "snippet": "void Update()\n{\n    transform.position = ___;\n}",
+        "input_label": "Что вставить вместо ___ ?",
+        "tests": [
+            {"expected": "transform.position + Vector3.up"},
+        ],
+        "block_id": "movement",
+    },
+
+    22: {
+        "title": "Поворот вокруг оси Y",
+        "short": "rotationSpeed",
+        "description": "Используй rotationSpeed и Time.deltaTime, чтобы крутить объект вокруг оси Y.",
+        "snippet": "public float rotationSpeed = 90f;\n\nvoid Update()\n{\n    transform.Rotate(0, ___, 0);\n}",
+        "input_label": "Что вставить вместо ___ ?",
+        "tests": [
+            {"expected": "rotationSpeed * Time.deltaTime"},
+        ],
+        "block_id": "movement",
+    },
+
+    23: {
+        "title": "Движение с Input (вперёд-назад)",
+        "short": "Vertical",
+        "description": "Используй ось Vertical, чтобы двигать объект вперёд и назад по Z.",
+        "snippet": "public float speed = 5f;\n\nvoid Update()\n{\n    float v = Input.GetAxis(\"Vertical\");\n    transform.Translate(Vector3.forward * v * ___);\n}",
+        "input_label": "Что вставить вместо ___ ?",
+        "tests": [
+            {"expected": "speed * Time.deltaTime"},
+        ],
+        "block_id": "movement",
+    },
+
+    24: {
+        "title": "Движение с Input (влево-вправо)",
+        "short": "Horizontal",
+        "description": "Используй ось Horizontal, чтобы двигать объект влево и вправо по X.",
+        "snippet": "public float speed = 5f;\n\nvoid Update()\n{\n    float h = Input.GetAxis(\"Horizontal\");\n    transform.Translate(Vector3.right * h * ___);\n}",
+        "input_label": "Что вставить вместо ___ ?",
+        "tests": [
+            {"expected": "speed * Time.deltaTime"},
+        ],
+        "block_id": "movement",
+    },
+
+    25: {
+        "title": "Остановка при нулевом Input",
+        "short": "нет движения без ввода",
+        "description": "Здесь код уже не двигает объект при нулевом вводе, но закрепим формулу движения.",
+        "snippet": "public float speed = 4f;\n\nvoid Update()\n{\n    float h = Input.GetAxis(\"Horizontal\");\n    if (h != 0)\n    {\n        transform.Translate(Vector3.right * h * ___);\n    }\n}",
+        "input_label": "Что вставить вместо ___ ?",
+        "tests": [
+            {"expected": "speed * Time.deltaTime"},
+        ],
+        "block_id": "movement",
     },
 })
